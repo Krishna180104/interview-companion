@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import Spinner from "./Spinner";
+import Card from "./Card";
+import Button from "./Button";
 
 function EvaluationScreen({ interviewId }) {
   const [loading, setLoading] = useState(false);
@@ -9,87 +10,54 @@ function EvaluationScreen({ interviewId }) {
 
   const handleEvaluate = async () => {
     setLoading(true);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/interview/evaluate",
-        { interviewId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setEvaluation(response.data.evaluation);
-
-    } catch (error) {
-      alert("Evaluation failed");
-    } finally {
-      setLoading(false);
-    }
+    const response = await axios.post(
+      "http://localhost:5000/api/interview/evaluate",
+      { interviewId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setEvaluation(response.data.evaluation);
+    setLoading(false);
   };
 
   if (!evaluation) {
     return (
-      <div className="bg-white p-8 rounded-xl shadow-sm border max-w-xl">
-        <h2 className="text-2xl font-semibold mb-4">
-          Interview Completed 🎉
-        </h2>
+      <Card className="space-y-6">
+        <h1 className="text-3xl font-semibold">
+          Interview Completed
+        </h1>
 
-        <p className="text-gray-600 mb-6">
-          Click below to evaluate your performance.
-        </p>
-
-        <button
-          onClick={handleEvaluate}
-          disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-md flex items-center gap-2 disabled:opacity-50"
-        >
-          {loading ? <Spinner /> : "Evaluate Interview"}
-        </button>
-      </div>
+        <Button loading={loading} onClick={handleEvaluate}>
+          Evaluate Interview
+        </Button>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border max-w-2xl">
-      <h2 className="text-2xl font-semibold mb-6">
+    <Card className="space-y-8">
+      <h1 className="text-3xl font-semibold">
         Interview Results
-      </h2>
+      </h1>
 
-      <div className="space-y-6">
-
-        {evaluation.evaluations.map((item, index) => (
-          <div key={index} className="border p-4 rounded-lg">
-            <p className="font-medium mb-2">
-              {item.question}
-            </p>
-
-            <p className="text-sm mb-2">
-              Score: <span className="font-semibold">{item.score}/10</span>
-            </p>
-
-            <p className="text-gray-600 text-sm">
-              {item.feedback}
-            </p>
-          </div>
-        ))}
-
-        <hr />
-
-        <div>
-          <p className="text-lg font-semibold">
-            Overall Score: {evaluation.overall_score}/10
+      {evaluation.evaluations.map((item, index) => (
+        <div key={index} className="border rounded-xl p-6 space-y-2">
+          <p className="font-medium">{item.question}</p>
+          <p className="text-sm">
+            Score: <span className="font-semibold">{item.score}/10</span>
           </p>
-
-          <p className="text-gray-600 mt-2">
-            {evaluation.overall_summary}
-          </p>
+          <p className="text-sm text-gray-600">{item.feedback}</p>
         </div>
+      ))}
 
+      <div className="pt-6 border-t">
+        <p className="text-xl font-semibold">
+          Overall Score: {evaluation.overall_score}/10
+        </p>
+        <p className="text-gray-600 mt-2">
+          {evaluation.overall_summary}
+        </p>
       </div>
-    </div>
+    </Card>
   );
 }
 

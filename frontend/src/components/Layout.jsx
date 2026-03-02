@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import Spinner from "./Spinner";
+import Button from "./Button";
 
 function Layout({ children }) {
   const navigate = useNavigate();
@@ -9,8 +9,6 @@ function Layout({ children }) {
 
   const handleLogout = async () => {
     setLoading(true);
-
-    // Simulate async operation (future API call)
     setTimeout(() => {
       localStorage.removeItem("token");
       setLoading(false);
@@ -20,30 +18,24 @@ function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
+
       {token && (
-        <nav className="bg-white border-b">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            
-            <Link to="/dashboard" className="text-lg font-semibold">
-              AI Interview Simulator
+        <nav className="bg-white border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-8 py-6 flex justify-between items-center">
+            <Link to="/dashboard" className="text-xl font-semibold">
+              AI Interview
             </Link>
 
-            <button
-              onClick={handleLogout}
-              disabled={loading}
-              className="text-sm bg-black text-white px-4 py-2 rounded-md flex items-center gap-2 disabled:opacity-50"
-            >
-              {loading ? <Spinner /> : "Logout"}
-            </button>
-
+            <Button loading={loading} onClick={handleLogout}>
+              Logout
+            </Button>
           </div>
         </nav>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-8 py-12">
         {children}
-      </div>
+      </main>
     </div>
   );
 }
