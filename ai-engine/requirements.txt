@@ -4,3 +4,4 @@ pymupdf
 spacy
 python-dotenv
 groq
+python-multipart
