@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/resume";
+const API = `${import.meta.env.VITE_API_URL}/api/resume`;
 
 export const uploadResume = async (file) => {
   const token = localStorage.getItem("token");

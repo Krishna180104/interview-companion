@@ -10,6 +10,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://your-frontend-url.vercel.app"
+  ],
+  credentials: true
+}));
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/resume", require("./routes/resumeRoutes"));

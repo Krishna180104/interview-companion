@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/interview";
+const API = `${import.meta.env.VITE_API_URL}/api/interview`;
 
 export const startInterview = async () => {
   const token = localStorage.getItem("token");

@@ -8,6 +8,7 @@ import json
 import os
 from dotenv import load_dotenv
 from groq import Groq
+from fastapi.middleware.cors import CORSMiddleware
 
 # ---------------------------------------
 # ENV SETUP
@@ -26,6 +27,13 @@ client = Groq(api_key=GROQ_API_KEY)
 # ---------------------------------------
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # safe for now, tighten later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load NLP model
 nlp = spacy.load("en_core_web_sm")

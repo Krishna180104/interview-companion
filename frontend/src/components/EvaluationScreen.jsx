@@ -11,7 +11,7 @@ function EvaluationScreen({ interviewId }) {
   const handleEvaluate = async () => {
     setLoading(true);
     const response = await axios.post(
-      "http://localhost:5000/api/interview/evaluate",
+      `${import.meta.env.VITE_API_URL}/api/interview/evaluate`,
       { interviewId },
       { headers: { Authorization: `Bearer ${token}` } }
     );

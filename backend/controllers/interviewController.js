@@ -14,7 +14,7 @@ exports.startInterview = async (req, res) => {
 
     // Send parsed resume to FastAPI
     const aiResponse = await axios.post(
-      "http://localhost:8000/generate-questions",
+      `${process.env.AI_ENGINE_URL}/generate-questions`,
       user.parsedResume
     );
 
@@ -70,7 +70,7 @@ exports.evaluateInterview = async (req, res) => {
 
     // Send Q&A to FastAPI
     const aiResponse = await axios.post(
-      "http://localhost:8000/evaluate-interview",
+      `${process.env.AI_ENGINE_URL}/evaluate-interview`,
       {
         questions: interview.questions,
       }

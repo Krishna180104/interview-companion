@@ -15,7 +15,7 @@ function History() {
         const fetchHistory = async () => {
             try {
                 const response = await axios.get(
-                    "http://localhost:5000/api/interview/history",
+                    `${import.meta.env.VITE_API_URL}/api/interview/history`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

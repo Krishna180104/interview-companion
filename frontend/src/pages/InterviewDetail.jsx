@@ -14,7 +14,7 @@ function InterviewDetail() {
         const fetchInterview = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:5000/api/interview/${id}`,
+                    `${import.meta.env.VITE_API_URL}/api/interview/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
