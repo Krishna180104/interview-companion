@@ -19,7 +19,7 @@ exports.uploadResume = async (req, res) => {
     formData.append("file", fs.createReadStream(req.file.path));
 
     const aiResponse = await axios.post(
-      "http://localhost:8000/parse-resume",
+      `${process.env.AI_ENGINE_URL}/parse-resume`,
       formData,
       {
         headers: formData.getHeaders(),
