@@ -67,6 +67,12 @@ function Dashboard() {
         <Link to="/interview">
           <Button className="w-full">Start Interview</Button>
         </Link>
+        
+        <Link to="/history">
+          <Button variant="secondary" className="w-full mt-3">
+            View Interview History
+          </Button>
+        </Link>
       </div>
 
     </Card>

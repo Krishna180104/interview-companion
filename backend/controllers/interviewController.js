@@ -91,3 +91,34 @@ exports.evaluateInterview = async (req, res) => {
     res.status(500).json({ message: "Evaluation failed" });
   }
 };
+
+exports.getInterviewHistory = async (req, res) => {
+  try {
+    const interviews = await Interview.find({
+      user: req.user.id,
+      status: "completed",
+    }).sort({ createdAt: -1 })
+
+    res.json(interviews);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch history" })
+  }
+};
+
+
+exports.getSingleInterview = async (req, res) => {
+  try {
+    const interview = await Interview.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    });
+
+    if (!interview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    res.json(interview);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch interview" });
+  }
+};

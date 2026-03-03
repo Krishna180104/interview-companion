@@ -189,14 +189,13 @@ For each question:
 - Give a score out of 10
 - Give 2-3 lines feedback
 
-Then give:
+Then provide:
 - Overall score (out of 10)
 - Overall summary (4-5 lines)
+- Confidence score (0-10, based on clarity and communication quality)
+- Communication feedback (2-3 lines)
 
-Return strictly valid JSON only.
-No explanations.
-No markdown.
-No extra text.
+Return strictly valid JSON.
 
 Format:
 
@@ -209,7 +208,9 @@ Format:
     }}
   ],
   "overall_score": 7.5,
-  "overall_summary": "..."
+  "overall_summary": "...",
+  "confidence_score": 8,
+  "communication_feedback": "..."
 }}
 
 Interview Data:

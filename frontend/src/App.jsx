@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import Interview from "./pages/Interview";
+import History from "./pages/History";
+import InterviewDetail from "./pages/InterviewDetail";
 
 function App() {
   return (
@@ -33,6 +35,28 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Interview />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <History />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <InterviewDetail />
               </Layout>
             </ProtectedRoute>
           }
