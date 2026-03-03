@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
+from fastapi import HTTPException
 from typing import List
 import fitz  # PyMuPDF
 import spacy
@@ -141,40 +142,34 @@ async def generate_questions(resume_data: ResumeData):
         prompt = f"""
 You are an expert technical interviewer.
 
-Evaluate the following interview answers.
+Based on the following candidate resume details, generate 12-16 interview questions.
 
-For each question:
-- Give a score out of 10
-- Give 2-3 lines feedback
-
-Then provide:
-- Overall score (out of 10)
-- Overall summary (4-5 lines)
-- Confidence score (0-10, based on clarity and communication quality)
-- Communication feedback (2-3 lines)
-- AI recommendation (5-6 lines of personalized improvement advice)
+Requirements:
+- Mix of technical and behavioral questions
+- Focus on candidate's skills
+- Questions must be relevant to their tech stack
+- Avoid generic questions
 
 Return strictly valid JSON.
 
 Format:
 
-{{
-  "evaluations": [...],
-  "overall_score": 7.5,
-  "overall_summary": "...",
-  "confidence_score": 8,
-  "communication_feedback": "...",
-  "ai_recommendation": "..."
-}}
+[
+  {{"question": "Explain your experience with X.", "type": "technical"}},
+  {{"question": "Describe a challenging project you worked on.", "type": "behavioral"}}
+]
 
-Interview Data:
-{data.questions}
+Candidate Resume Data:
+Name: {resume_data.name}
+Skills: {resume_data.skills}
+Education: {resume_data.education_keywords}
+Experience Keywords: {resume_data.experience_keywords}
 """
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "You are a strict professional interviewer."},
+                {"role": "system", "content": "You are a professional interviewer."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -182,7 +177,6 @@ Interview Data:
 
         content = response.choices[0].message.content.strip()
 
-        # Convert LLM string output to real JSON
         questions = json.loads(content)
 
         return {
@@ -216,6 +210,7 @@ Then provide:
 - Overall summary (4-5 lines)
 - Confidence score (0-10, based on clarity and communication quality)
 - Communication feedback (2-3 lines)
+- AI recommendation (5-6 lines of personalized improvement advice)
 
 Return strictly valid JSON.
 
@@ -232,11 +227,12 @@ Format:
   "overall_score": 7.5,
   "overall_summary": "...",
   "confidence_score": 8,
-  "communication_feedback": "..."
+  "communication_feedback": "...",
+  "ai_recommendation": "..."
 }}
 
 Interview Data:
-{data.questions}
+{json.dumps(data.dict(), indent=2)}
 """
 
         response = client.chat.completions.create(
@@ -250,7 +246,7 @@ Interview Data:
 
         content = response.choices[0].message.content.strip()
 
-        # 🔥 Extract JSON safely
+        # Extract JSON safely
         json_match = re.search(r"\{.*\}", content, re.DOTALL)
 
         if not json_match:
@@ -266,8 +262,4 @@ Interview Data:
         }
 
     except Exception as e:
-        return {
-            "message": "Evaluation failed",
-            "error": str(e),
-            "raw_response": content if 'content' in locals() else None
-        }
+        raise HTTPException(status_code=500, detail=str(e))
