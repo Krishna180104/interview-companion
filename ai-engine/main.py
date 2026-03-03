@@ -36,7 +36,13 @@ app.add_middleware(
 )
 
 # Load NLP model
-nlp = spacy.load("en_core_web_sm")
+nlp = None
+
+def get_nlp():
+    global nlp
+    if nlp is None:
+        nlp = spacy.load("en_core_web_sm")
+    return nlp
 
 # ---------------------------------------
 # PDF TEXT EXTRACTION
@@ -66,7 +72,7 @@ def extract_email(text):
     return match.group(0) if match else None
 
 def extract_name(text):
-    doc = nlp(text)
+    doc = get_nlp()(text)
     for ent in doc.ents:
         if ent.label_ == "PERSON":
             return ent.text
