@@ -141,26 +141,34 @@ async def generate_questions(resume_data: ResumeData):
         prompt = f"""
 You are an expert technical interviewer.
 
-Generate 6 high-quality interview questions based on the candidate resume.
+Evaluate the following interview answers.
 
-Candidate Details:
-Name: {resume_data.name}
-Skills: {resume_data.skills}
-Education: {resume_data.education_keywords}
-Experience Keywords: {resume_data.experience_keywords}
+For each question:
+- Give a score out of 10
+- Give 2-3 lines feedback
 
-Rules:
-- Generate 4 technical questions based on skills.
-- Generate 2 behavioral questions.
-- Make them realistic and slightly challenging.
-- Return strictly valid JSON array only.
-- No explanations.
-- Format exactly like:
+Then provide:
+- Overall score (out of 10)
+- Overall summary (4-5 lines)
+- Confidence score (0-10, based on clarity and communication quality)
+- Communication feedback (2-3 lines)
+- AI recommendation (5-6 lines of personalized improvement advice)
 
-[
-  {{"question": "Question text", "type": "technical"}},
-  {{"question": "Question text", "type": "behavioral"}}
-]
+Return strictly valid JSON.
+
+Format:
+
+{{
+  "evaluations": [...],
+  "overall_score": 7.5,
+  "overall_summary": "...",
+  "confidence_score": 8,
+  "communication_feedback": "...",
+  "ai_recommendation": "..."
+}}
+
+Interview Data:
+{data.questions}
 """
 
         response = client.chat.completions.create(

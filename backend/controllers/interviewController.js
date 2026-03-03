@@ -79,6 +79,53 @@ exports.evaluateInterview = async (req, res) => {
     interview.status = "completed";
     interview.evaluation = aiResponse.data.result;
 
+    const evaluation = aiResponse.data;
+
+    let recommendations = [];
+
+    // Structured logic
+    if (evaluation.overall_score < 6) {
+      recommendations.push("Your overall performance needs improvement. Focus on revising core fundamentals.");
+    }
+
+    if (evaluation.confidence_score < 6) {
+      recommendations.push("Work on communication clarity and structured answering techniques like the STAR method.");
+    }
+
+    if (evaluation.overall_score >= 8) {
+      recommendations.push("You are performing well. Try attempting higher-difficulty system design questions.");
+    }
+
+    // Technical vs Behavioral logic
+    const technicalScores = [];
+    const behavioralScores = [];
+
+    evaluation.evaluations.forEach((item, index) => {
+      const type = interview.questions[index]?.type;
+
+      if (type === "technical") technicalScores.push(item.score);
+      if (type === "behavioral") behavioralScores.push(item.score);
+    });
+
+    const avgTechnical = technicalScores.length
+      ? technicalScores.reduce((a, b) => a + b, 0) / technicalScores.length
+      : null;
+
+    const avgBehavioral = behavioralScores.length
+      ? behavioralScores.reduce((a, b) => a + b, 0) / behavioralScores.length
+      : null;
+
+    if (avgTechnical && avgTechnical < 6) {
+      recommendations.push("Strengthen your technical depth, especially problem-solving and core concepts.");
+    }
+
+    if (avgBehavioral && avgBehavioral < 6) {
+      recommendations.push("Improve behavioral responses by preparing structured real-world examples.");
+    }
+
+    // Attach recommendations
+    interview.evaluation.recommendations = recommendations;
+
     await interview.save();
 
     res.json({
