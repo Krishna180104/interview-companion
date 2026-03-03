@@ -18,6 +18,7 @@ exports.startInterview = async (req, res) => {
       user.parsedResume
     );
 
+    console.log(aiResponse.data);
     const questions = aiResponse.data.questions;
 
     const interview = await Interview.create({
@@ -99,7 +100,7 @@ exports.evaluateInterview = async (req, res) => {
     // Technical vs Behavioral logic
     const technicalScores = [];
     const behavioralScores = [];
-
+    console.log(aiResponse.data);
     evaluation.evaluations.forEach((item, index) => {
       const type = interview.questions[index]?.type;
 
