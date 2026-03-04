@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Interview from "./pages/Interview";
 import History from "./pages/History";
 import InterviewDetail from "./pages/InterviewDetail";
+import VerifyOTP from "./pages/VerifyOTP";
 
 function App() {
   return (
@@ -61,6 +62,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/verify-otp" element={<VerifyOTP />} />
 
       </Routes>
     </Router>
