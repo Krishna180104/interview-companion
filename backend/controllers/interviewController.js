@@ -1,6 +1,11 @@
 const Interview = require("../models/Interview");
 const User = require("../models/User");
-const axios = require('axios');
+const axios = require("axios");
+
+
+// ============================
+// START INTERVIEW
+// ============================
 
 exports.startInterview = async (req, res) => {
   try {
@@ -12,14 +17,20 @@ exports.startInterview = async (req, res) => {
       });
     }
 
-    // Send parsed resume to FastAPI
     const aiResponse = await axios.post(
       `${process.env.AI_ENGINE_URL}/generate-questions`,
       user.parsedResume
     );
 
-    console.log(aiResponse.data);
-    const questions = aiResponse.data.questions;
+    console.log("AI QUESTION RESPONSE:", aiResponse.data);
+
+    const questions = aiResponse.data.questions || [];
+
+    if (!questions.length) {
+      return res.status(500).json({
+        message: "AI failed to generate questions",
+      });
+    }
 
     const interview = await Interview.create({
       user: req.user.id,
@@ -33,10 +44,16 @@ exports.startInterview = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error.message);
+    console.error("Start Interview Error:", error.response?.data || error.message);
     res.status(500).json({ message: "AI Interview generation failed" });
   }
 };
+
+
+
+// ============================
+// SAVE ANSWER
+// ============================
 
 exports.saveAnswer = async (req, res) => {
   try {
@@ -55,9 +72,16 @@ exports.saveAnswer = async (req, res) => {
     res.json({ message: "Answer saved" });
 
   } catch (error) {
+    console.error("Save Answer Error:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+// ============================
+// EVALUATE INTERVIEW
+// ============================
 
 exports.evaluateInterview = async (req, res) => {
   try {
@@ -69,7 +93,6 @@ exports.evaluateInterview = async (req, res) => {
       return res.status(404).json({ message: "Interview not found" });
     }
 
-    // Send Q&A to FastAPI
     const aiResponse = await axios.post(
       `${process.env.AI_ENGINE_URL}/evaluate-interview`,
       {
@@ -77,31 +100,53 @@ exports.evaluateInterview = async (req, res) => {
       }
     );
 
-    interview.status = "completed";
-    interview.evaluation = aiResponse.data.result;
+    console.log("AI EVALUATION RESPONSE:", aiResponse.data);
 
-    const evaluation = aiResponse.data;
+    const evaluation = aiResponse.data.result;
+
+    if (!evaluation) {
+      return res.status(500).json({
+        message: "AI evaluation failed",
+      });
+    }
+
+    interview.status = "completed";
+    interview.evaluation = evaluation;
 
     let recommendations = [];
 
-    // Structured logic
+    // ============================
+    // STRUCTURED LOGIC
+    // ============================
+
     if (evaluation.overall_score < 6) {
-      recommendations.push("Your overall performance needs improvement. Focus on revising core fundamentals.");
+      recommendations.push(
+        "Your overall performance needs improvement. Focus on revising core fundamentals."
+      );
     }
 
     if (evaluation.confidence_score < 6) {
-      recommendations.push("Work on communication clarity and structured answering techniques like the STAR method.");
+      recommendations.push(
+        "Work on communication clarity and structured answering techniques like the STAR method."
+      );
     }
 
     if (evaluation.overall_score >= 8) {
-      recommendations.push("You are performing well. Try attempting higher-difficulty system design questions.");
+      recommendations.push(
+        "You are performing well. Try attempting higher-difficulty system design questions."
+      );
     }
 
-    // Technical vs Behavioral logic
+    // ============================
+    // TECHNICAL VS BEHAVIORAL ANALYSIS
+    // ============================
+
     const technicalScores = [];
     const behavioralScores = [];
-    console.log(aiResponse.data);
-    evaluation.evaluations.forEach((item, index) => {
+
+    const evaluations = evaluation.evaluations || [];
+
+    evaluations.forEach((item, index) => {
       const type = interview.questions[index]?.type;
 
       if (type === "technical") technicalScores.push(item.score);
@@ -117,14 +162,17 @@ exports.evaluateInterview = async (req, res) => {
       : null;
 
     if (avgTechnical && avgTechnical < 6) {
-      recommendations.push("Strengthen your technical depth, especially problem-solving and core concepts.");
+      recommendations.push(
+        "Strengthen your technical depth, especially problem-solving and core concepts."
+      );
     }
 
     if (avgBehavioral && avgBehavioral < 6) {
-      recommendations.push("Improve behavioral responses by preparing structured real-world examples.");
+      recommendations.push(
+        "Improve behavioral responses by preparing structured real-world examples."
+      );
     }
 
-    // Attach recommendations
     interview.evaluation.recommendations = recommendations;
 
     await interview.save();
@@ -135,24 +183,37 @@ exports.evaluateInterview = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error.message);
+    console.error("Evaluation Error:", error.response?.data || error.message);
     res.status(500).json({ message: "Evaluation failed" });
   }
 };
+
+
+
+// ============================
+// GET INTERVIEW HISTORY
+// ============================
 
 exports.getInterviewHistory = async (req, res) => {
   try {
     const interviews = await Interview.find({
       user: req.user.id,
       status: "completed",
-    }).sort({ createdAt: -1 })
+    }).sort({ createdAt: -1 });
 
     res.json(interviews);
+
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch history" })
+    console.error("History Error:", error.message);
+    res.status(500).json({ message: "Failed to fetch history" });
   }
 };
 
+
+
+// ============================
+// GET SINGLE INTERVIEW
+// ============================
 
 exports.getSingleInterview = async (req, res) => {
   try {
@@ -166,7 +227,9 @@ exports.getSingleInterview = async (req, res) => {
     }
 
     res.json(interview);
+
   } catch (error) {
+    console.error("Single Interview Error:", error.message);
     res.status(500).json({ message: "Failed to fetch interview" });
   }
 };
